@@ -22,13 +22,18 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # 3. Configurar Gradle automáticamente (así no depende de encontrar el archivo ./gradlew)
+      # 3. Configurar Gradle automáticamente
       - name: Configurar Gradle
         uses: gradle/gradle-build-action@v2
 
-      # 4. Compilar el APK usando el comando global de Gradle
+      # 4. Buscar la carpeta correcta y compilar el APK desde ahí
       - name: Compilar APK de Android
-        run: gradle assembleDebug
+        run: |
+          # Busca dónde está el archivo settings.gradle o build.gradle y entra a esa carpeta
+          GRADLE_DIR=$(find . -name "settings.gradle" -o -name "build.gradle" | head -n 1 | xargs dirname)
+          echo "Proyecto encontrado en la carpeta: $GRADLE_DIR"
+          cd "$GRADLE_DIR"
+          gradle assembleDebug
 
       # 5. Guardar el archivo APK para descargar
       - name: Subir APK generado
