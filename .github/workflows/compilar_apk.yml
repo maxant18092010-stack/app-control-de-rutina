@@ -28,13 +28,13 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # 4. Instalar Capacitor e inicializarlo dentro de tu carpeta "routine-flow"
+      # 4. Instalar Capacitor e inicializarlo correctamente sin usar el punto (.)
       - name: Inicializar contenedor de Android
         run: |
           cd routine-flow
           npm init -y
           npm install @capacitor/core @capacitor/cli
-          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=.
+          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=""
           npm install @capacitor/android
           npx cap add android
           npx cap sync android
