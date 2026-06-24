@@ -15,7 +15,7 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v3
 
-      # 2. Configurar Node.js para empaquetar la app web de Vibe Code
+      # 2. Configurar Node.js
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
@@ -28,13 +28,19 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # 4. Instalar Capacitor e inicializarlo correctamente sin usar el punto (.)
+      # 4. Estructurar directorio web e inicializar Capacitor de forma válida
       - name: Inicializar contenedor de Android
         run: |
           cd routine-flow
+          # Crear una carpeta web física para evitar el error de webDir
+          mkdir -p www
+          # Copiar todos tus archivos HTML, CSS y JS a la carpeta www (ignorando la propia www)
+          cp -r *.html *.css *.js www/ 2>/dev/null || true
+          
+          # Inicializar proyecto Node y Capacitor apuntando a 'www'
           npm init -y
           npm install @capacitor/core @capacitor/cli
-          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=""
+          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=www
           npm install @capacitor/android
           npx cap add android
           npx cap sync android
