@@ -1,4 +1,4 @@
-name: Compilar APK Nativo
+name: Compilar APK Vibe Code
 
 on:
   push:
@@ -11,33 +11,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el código de tu repositorio
+      # 1. Descargar tu código
       - name: Checkout del código
         uses: actions/checkout@v3
 
-      # 2. Configurar Java JDK 17
+      # 2. Configurar Node.js para empaquetar la app web de Vibe Code
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Configurar Java para compilar el APK
       - name: Configurar Java JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # 3. Configurar Gradle automáticamente
-      - name: Configurar Gradle
-        uses: gradle/gradle-build-action@v2
+      # 4. Instalar Capacitor e inicializarlo dentro de tu carpeta "routine-flow"
+      - name: Inicializar contenedor de Android
+        run: |
+          cd routine-flow
+          npm init -y
+          npm install @capacitor/core @capacitor/cli
+          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=.
+          npm install @capacitor/android
+          npx cap add android
+          npx cap sync android
 
-      # 4. Buscar la carpeta correcta y compilar el APK desde ahí
+      # 5. Compilar el archivo APK real
       - name: Compilar APK de Android
         run: |
-          # Busca dónde está el archivo settings.gradle o build.gradle y entra a esa carpeta
-          GRADLE_DIR=$(find . -name "settings.gradle" -o -name "build.gradle" | head -n 1 | xargs dirname)
-          echo "Proyecto encontrado en la carpeta: $GRADLE_DIR"
-          cd "$GRADLE_DIR"
-          gradle assembleDebug
+          cd routine-flow/android
+          ./gradlew assembleDebug
 
-      # 5. Guardar el archivo APK para descargar
+      # 6. Guardar el archivo APK para que lo descargues
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: app-nativa-apk
-          path: '**/build/outputs/apk/debug/app-debug.apk'
+          name: app-vibe-apk
+          path: 'routine-flow/android/app/build/outputs/apk/debug/app-debug.apk'
