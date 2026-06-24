@@ -1,0 +1,34 @@
+name: Compilar APK Nativo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar Java JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Cambiar permisos a Gradle
+        run: chmod +x ./gradlew
+        continue-on-error: true
+
+      - name: Compilar APK de Android
+        run: ./gradlew assembleDebug
+
+      - name: Subir APK generado
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-nativa-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
