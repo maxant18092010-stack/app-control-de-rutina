@@ -11,24 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Descargar el código de tu repositorio
       - name: Checkout del código
         uses: actions/checkout@v3
 
+      # 2. Configurar Java JDK 17
       - name: Configurar Java JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Cambiar permisos a Gradle
-        run: chmod +x ./gradlew
-        continue-on-error: true
+      # 3. Configurar Gradle automáticamente (así no depende de encontrar el archivo ./gradlew)
+      - name: Configurar Gradle
+        uses: gradle/gradle-build-action@v2
 
+      # 4. Compilar el APK usando el comando global de Gradle
       - name: Compilar APK de Android
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug
 
+      # 5. Guardar el archivo APK para descargar
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
           name: app-nativa-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: '**/build/outputs/apk/debug/app-debug.apk'
