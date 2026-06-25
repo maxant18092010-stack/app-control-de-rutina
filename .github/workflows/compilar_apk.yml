@@ -1,4 +1,4 @@
-name: Compilar APK Vibe Code
+name: Compilar APK Nativa Vibe Code
 
 on:
   push:
@@ -11,49 +11,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar tu código
+      # 1. Descargar tu código nativo (.kt y .xml)
       - name: Checkout del código
         uses: actions/checkout@v3
 
-      # 2. Configurar Node.js
-      - name: Configurar Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      # 3. Configurar Java para compilar el APK
+      # 2. Configurar Java JDK 17 (Esencial para Kotlin/Android)
       - name: Configurar Java JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # 4. Estructurar directorio web e inicializar Capacitor de forma válida
-      - name: Inicializar contenedor de Android
+      # 3. Crear la estructura de Gradle desde cero dentro de tu carpeta "routine-flow"
+      - name: Generar entorno Android Studio faltante
         run: |
           cd routine-flow
-          # Crear una carpeta web física para evitar el error de webDir
-          mkdir -p www
-          # Copiar todos tus archivos HTML, CSS y JS a la carpeta www (ignorando la propia www)
-          cp -r *.html *.css *.js www/ 2>/dev/null || true
+          gradle init --type basic --dsl groovy --incubating
           
-          # Inicializar proyecto Node y Capacitor apuntando a 'www'
-          npm init -y
-          npm install @capacitor/core @capacitor/cli
-          npx cap init "Control de Rutina" "com.app.controlrutina" --web-dir=www
-          npm install @capacitor/android
-          npx cap add android
-          npx cap sync android
+          # Crear un archivo build.gradle básico si no existe para que pueda compilarse como app
+          if [ ! -f build.gradle ]; then
+            echo 'plugins { id "com.android.application" version "8.1.0" apply false }' > build.gradle
+          fi
 
-      # 5. Compilar el archivo APK real
+      # 4. Compilar los archivos nativos usando Gradle
       - name: Compilar APK de Android
         run: |
-          cd routine-flow/android
-          ./gradlew assembleDebug
+          cd routine-flow
+          gradle assembleDebug --stacktrace
 
-      # 6. Guardar el archivo APK para que lo descargues
+      # 5. Guardar el APK final para descargar
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: app-vibe-apk
-          path: 'routine-flow/android/app/build/outputs/apk/debug/app-debug.apk'
+          name: app-nativa-apk
+          path: 'routine-flow/**/build/outputs/apk/debug/*.apk'
