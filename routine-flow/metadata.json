@@ -1,6 +1,0 @@
-{
-  "name": "Routine Flow",
-  "description": "A elegant offline routine tracker with a custom dashboard, priority levels, local reminders, and completion analytics.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
